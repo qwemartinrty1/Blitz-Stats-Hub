@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "WoT Blitz Stats"
+version = "1.0.0"
+id = "artifacts/wotblitz"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 18623
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/wotblitz run dev"
+
+[services.env]
+PORT = "18623"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/wotblitz", "run", "build"]
+publicDir = "artifacts/wotblitz/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

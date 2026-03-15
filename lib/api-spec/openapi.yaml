@@ -3,13 +3,21 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: WoT Blitz Stats API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: players
+    description: Player operations
+  - name: tournaments
+    description: Tournament operations
+  - name: posts
+    description: Posts/feed operations
+  - name: settings
+    description: User settings
 paths:
   /healthz:
     get:
@@ -24,6 +32,257 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /players/search:
+    get:
+      operationId: searchPlayers
+      tags: [players]
+      summary: Search players by nickname
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: server
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [com, eu, asia]
+            default: eu
+      responses:
+        "200":
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerSearchResponse"
+
+  /players/{accountId}:
+    get:
+      operationId: getPlayerProfile
+      tags: [players]
+      summary: Get player profile and statistics
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: server
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [com, eu, asia]
+            default: eu
+      responses:
+        "200":
+          description: Player profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerProfileResponse"
+        "404":
+          description: Player not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /players/{accountId}/tanks:
+    get:
+      operationId: getPlayerTanks
+      tags: [players]
+      summary: Get player tank statistics
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: server
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [com, eu, asia]
+            default: eu
+      responses:
+        "200":
+          description: Tank statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TankStatsResponse"
+
+  /tournaments:
+    get:
+      operationId: listTournaments
+      tags: [tournaments]
+      summary: List all tournaments
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [upcoming, active, completed]
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of tournaments
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentListResponse"
+    post:
+      operationId: createTournament
+      tags: [tournaments]
+      summary: Create a new tournament
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTournamentInput"
+      responses:
+        "201":
+          description: Tournament created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournament"
+
+  /tournaments/{tournamentId}:
+    get:
+      operationId: getTournament
+      tags: [tournaments]
+      summary: Get a specific tournament
+      parameters:
+        - name: tournamentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Tournament details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Tournament"
+        "404":
+          description: Tournament not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /posts:
+    get:
+      operationId: listPosts
+      tags: [posts]
+      summary: Get posts feed
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Posts feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostsListResponse"
+    post:
+      operationId: createPost
+      tags: [posts]
+      summary: Create a new post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostInput"
+      responses:
+        "201":
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+
+  /posts/{postId}/like:
+    post:
+      operationId: likePost
+      tags: [posts]
+      summary: Like or unlike a post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Like toggled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LikeResponse"
+
+  /settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Get user settings
+      responses:
+        "200":
+          description: User settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+    put:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Update user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSettingsInput"
+      responses:
+        "200":
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSettings"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +293,465 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
+
+    PlayerSearchResult:
+      type: object
+      properties:
+        account_id:
+          type: integer
+        nickname:
+          type: string
+      required:
+        - account_id
+        - nickname
+
+    PlayerSearchResponse:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlayerSearchResult"
+        count:
+          type: integer
+      required:
+        - players
+        - count
+
+    PlayerStatistics:
+      type: object
+      properties:
+        battles:
+          type: integer
+        wins:
+          type: integer
+        losses:
+          type: integer
+        frags:
+          type: integer
+        damage_dealt:
+          type: integer
+        damage_received:
+          type: integer
+        spotted:
+          type: integer
+        hits:
+          type: integer
+        shots:
+          type: integer
+        survived_battles:
+          type: integer
+        xp:
+          type: integer
+        win_rate:
+          type: number
+        avg_damage:
+          type: number
+        avg_frags:
+          type: number
+      required:
+        - battles
+        - wins
+        - losses
+        - frags
+        - damage_dealt
+        - damage_received
+        - spotted
+        - hits
+        - shots
+        - survived_battles
+        - xp
+        - win_rate
+        - avg_damage
+        - avg_frags
+
+    PlayerProfile:
+      type: object
+      properties:
+        account_id:
+          type: integer
+        nickname:
+          type: string
+        created_at:
+          type: integer
+        last_battle_time:
+          type: integer
+        statistics:
+          $ref: "#/components/schemas/PlayerStatistics"
+        max_frags:
+          type: integer
+        max_damage:
+          type: integer
+        max_xp:
+          type: integer
+        clan_tag:
+          type: string
+          nullable: true
+        clan_id:
+          type: integer
+          nullable: true
+        is_own_profile:
+          type: boolean
+      required:
+        - account_id
+        - nickname
+        - created_at
+        - last_battle_time
+        - statistics
+        - max_frags
+        - max_damage
+        - max_xp
+        - is_own_profile
+
+    PlayerProfileResponse:
+      type: object
+      properties:
+        player:
+          $ref: "#/components/schemas/PlayerProfile"
+      required:
+        - player
+
+    TankStats:
+      type: object
+      properties:
+        tank_id:
+          type: integer
+        tank_name:
+          type: string
+        tank_tier:
+          type: integer
+        tank_type:
+          type: string
+        battles:
+          type: integer
+        wins:
+          type: integer
+        frags:
+          type: integer
+        damage_dealt:
+          type: integer
+        mark_of_mastery:
+          type: integer
+        win_rate:
+          type: number
+        avg_damage:
+          type: number
+        last_battle_time:
+          type: integer
+      required:
+        - tank_id
+        - tank_name
+        - tank_tier
+        - tank_type
+        - battles
+        - wins
+        - frags
+        - damage_dealt
+        - mark_of_mastery
+        - win_rate
+        - avg_damage
+        - last_battle_time
+
+    TankStatsResponse:
+      type: object
+      properties:
+        tanks:
+          type: array
+          items:
+            $ref: "#/components/schemas/TankStats"
+        count:
+          type: integer
+      required:
+        - tanks
+        - count
+
+    TournamentParticipant:
+      type: object
+      properties:
+        account_id:
+          type: integer
+        nickname:
+          type: string
+        score:
+          type: integer
+        rank:
+          type: integer
+      required:
+        - account_id
+        - nickname
+        - score
+        - rank
+
+    Tournament:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [upcoming, active, completed]
+        start_date:
+          type: string
+        end_date:
+          type: string
+        prize_pool:
+          type: string
+          nullable: true
+        max_participants:
+          type: integer
+          nullable: true
+        current_participants:
+          type: integer
+        format:
+          type: string
+        tier_requirement:
+          type: integer
+          nullable: true
+        participants:
+          type: array
+          items:
+            $ref: "#/components/schemas/TournamentParticipant"
+          nullable: true
+        created_at:
+          type: string
+      required:
+        - id
+        - title
+        - description
+        - status
+        - start_date
+        - end_date
+        - current_participants
+        - format
+        - created_at
+
+    TournamentListResponse:
+      type: object
+      properties:
+        tournaments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tournament"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - tournaments
+        - total
+        - page
+        - limit
+
+    CreateTournamentInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+        end_date:
+          type: string
+        format:
+          type: string
+        prize_pool:
+          type: string
+          nullable: true
+        max_participants:
+          type: integer
+          nullable: true
+        tier_requirement:
+          type: integer
+          nullable: true
+      required:
+        - title
+        - description
+        - start_date
+        - end_date
+        - format
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        author_id:
+          type: integer
+        author_nickname:
+          type: string
+        author_clan_tag:
+          type: string
+          nullable: true
+        content:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        likes_count:
+          type: integer
+        comments_count:
+          type: integer
+        is_liked:
+          type: boolean
+        post_type:
+          type: string
+          enum: [text, battle_result, achievement, tank_review]
+        battle_result:
+          $ref: "#/components/schemas/BattleResult"
+          nullable: true
+        created_at:
+          type: string
+      required:
+        - id
+        - author_id
+        - author_nickname
+        - content
+        - likes_count
+        - comments_count
+        - is_liked
+        - post_type
+        - created_at
+
+    BattleResult:
+      type: object
+      properties:
+        tank_name:
+          type: string
+        damage_dealt:
+          type: integer
+        frags:
+          type: integer
+        xp:
+          type: integer
+        result:
+          type: string
+          enum: [win, loss, draw]
+        map_name:
+          type: string
+      required:
+        - tank_name
+        - damage_dealt
+        - frags
+        - xp
+        - result
+        - map_name
+
+    PostsListResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: "#/components/schemas/Post"
+        total:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+      required:
+        - posts
+        - total
+        - page
+        - limit
+
+    CreatePostInput:
+      type: object
+      properties:
+        content:
+          type: string
+        post_type:
+          type: string
+          enum: [text, battle_result, achievement, tank_review]
+        image_url:
+          type: string
+          nullable: true
+      required:
+        - content
+        - post_type
+
+    LikeResponse:
+      type: object
+      properties:
+        liked:
+          type: boolean
+        likes_count:
+          type: integer
+      required:
+        - liked
+        - likes_count
+
+    UserSettings:
+      type: object
+      properties:
+        account_id:
+          type: integer
+          nullable: true
+        wg_nickname:
+          type: string
+          nullable: true
+        server:
+          type: string
+          enum: [com, eu, asia]
+        notifications_enabled:
+          type: boolean
+        theme:
+          type: string
+          enum: [light, dark, system]
+        language:
+          type: string
+        show_clan_tag:
+          type: boolean
+        privacy_mode:
+          type: boolean
+        linked_account:
+          type: boolean
+      required:
+        - server
+        - notifications_enabled
+        - theme
+        - language
+        - show_clan_tag
+        - privacy_mode
+        - linked_account
+
+    UpdateSettingsInput:
+      type: object
+      properties:
+        account_id:
+          type: integer
+          nullable: true
+        wg_nickname:
+          type: string
+          nullable: true
+        server:
+          type: string
+          enum: [com, eu, asia]
+        notifications_enabled:
+          type: boolean
+        theme:
+          type: string
+          enum: [light, dark, system]
+        language:
+          type: string
+        show_clan_tag:
+          type: boolean
+        privacy_mode:
+          type: boolean

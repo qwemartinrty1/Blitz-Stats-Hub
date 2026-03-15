@@ -1,0 +1,22 @@
+packages:
+  "framer-motion": "For tactical HUD animations, page transitions, and staggered list reveals"
+  "date-fns": "For formatting battle timestamps and tournament dates"
+  "recharts": "For displaying player statistic charts and win rate visualizations"
+  "clsx": "For conditional tactical class names"
+  "tailwind-merge": "For merging tactical class names safely"
+
+images:
+  - path: "artifacts/wotblitz/public/images/metal-bg.png"
+    description: "Dark distressed brushed metal texture with subtle tactical grid lines, very dark gray, perfect for a dark mode military game UI background"
+    aspect_ratio: "16:9"
+  - path: "artifacts/wotblitz/public/images/tank-hero.png"
+    description: "Abstract silhouette of a heavy battle tank in smoke and glowing orange embers, cinematic lighting, dark background, highly stylized"
+    aspect_ratio: "16:9"
+  - path: "artifacts/wotblitz/public/images/tactical-map.png"
+    description: "Abstract tactical military map topology, dark green and black, glowing interface elements, subtle scanlines"
+    aspect_ratio: "16:9"
+
+notes:
+  - Using generated React Query hooks from @workspace/api-client-react.
+  - Relying on Wouter for routing.
+  - Aesthetic is Dark Military/Tactical (HUD interfaces, cut corners, glowing amber/orange accents).
