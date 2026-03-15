@@ -1,8 +1,8 @@
 import { useRoute, useLocation } from "wouter";
 import { Layout } from "@/components/layout";
 import { useGetPlayerProfile, useGetPlayerTanks } from "@workspace/api-client-react";
-import { TacCard, StatBox, FadeIn, TacBadge, cn } from "@/components/ui/tactical";
-import { Crosshair, Shield, Target, Award, Clock, ArrowLeft, ExternalLink } from "lucide-react";
+import { TacCard, StatBox, FadeIn, TacBadge, TacButton, cn } from "@/components/ui/tactical";
+import { Crosshair, Shield, Target, Award, Clock, ArrowLeft, ExternalLink, Users } from "lucide-react";
 import { format } from "date-fns";
 
 // Color coding helper based on Wot Blitz standard colors
@@ -61,7 +61,23 @@ export default function PlayerProfile() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto w-full space-y-6">
-        
+
+        {/* Back + viewing-another-player banner */}
+        <FadeIn>
+          <div className="flex items-center justify-between gap-4">
+            <button
+              onClick={() => window.history.length > 1 ? window.history.back() : setLocation("/search")}
+              className="flex items-center gap-2 text-sm font-display tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+            <div className="flex items-center gap-2 text-xs font-display tracking-widest uppercase text-muted-foreground bg-white/5 border border-white/10 px-3 py-1.5 rounded-sm">
+              <Users className="w-4 h-4 text-primary" />
+              Viewing Player Profile
+            </div>
+          </div>
+        </FadeIn>
+
         {/* Header/Hero Section */}
         <FadeIn>
           <div className="relative w-full rounded-sm overflow-hidden border border-white/10 bg-card">
