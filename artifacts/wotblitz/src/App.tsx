@@ -2,9 +2,11 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { PostsProvider } from "@/lib/posts-context";
 
 // Pages
 import Feed from "./pages/feed";
+import PostEditor from "./pages/post-editor";
 import Search from "./pages/search";
 import Tournaments from "./pages/tournaments";
 import TournamentDetail from "./pages/tournament-detail";
@@ -17,7 +19,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 5,
     },
   },
 });
@@ -26,6 +28,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Feed} />
+      <Route path="/posts/new" component={PostEditor} />
+      <Route path="/posts/:id/edit" component={PostEditor} />
       <Route path="/search" component={Search} />
       <Route path="/tournaments" component={Tournaments} />
       <Route path="/tournaments/:id" component={TournamentDetail} />
@@ -41,9 +45,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
+        <PostsProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+        </PostsProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
