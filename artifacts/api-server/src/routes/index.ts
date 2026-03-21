@@ -1,16 +1,16 @@
-import { Router, type IRouter } from "express";
-import healthRouter from "./health";
-import playersRouter from "./players";
-import tournamentsRouter from "./tournaments";
-import postsRouter from "./posts";
-import settingsRouter from "./settings";
+import { Router } from "express";
+import healthRouter    from "./health";
+import postsRouter     from "./posts";
+import commentsRouter  from "./comments";
+import usersRouter     from "./users";
+import uploadRouter    from "./upload";
 
-const router: IRouter = Router();
+const router = Router();
 
 router.use(healthRouter);
-router.use("/players", playersRouter);
-router.use("/tournaments", tournamentsRouter);
-router.use("/posts", postsRouter);
-router.use("/settings", settingsRouter);
+router.use("/posts",   postsRouter);
+router.use("/posts/:postId/comments", commentsRouter);
+router.use("/users",  usersRouter);
+router.use("/upload", uploadRouter);
 
 export default router;
